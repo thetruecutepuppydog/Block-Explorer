@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Width Dropdown</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .dropdown {
+      position: relative;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .dropdown button {
+      width: 100%;
+      background-color: #007BFF; /* Blue color */
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: relative;
+      background-color: #f9f9f9;
+      min-width: 100%;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      padding: 12px 16px;
+      z-index: 1;
+      margin-top: 10px;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .transaction {
+      margin-bottom: 16px;
+    }
+
+    .add-transaction-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #28a745; /* Green color */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .center-button {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="center-button">
+  <button class="add-transaction-btn" id="load-block-btn" onclick="loadBlock()">Load One Block</button>
+</div>
+<div id="blocks-container"></div>
+
+<script>
+  let blockCount = 0; // Initialize block count
+
+  function loadBlock() {
+    blockCount++; // Increment the block count
+
+    // Create a new div element for the new dropdown
+    const newDropdown = document.createElement('div');
+    newDropdown.classList.add('dropdown');
+    
+    // Generate a unique ID for the new transaction container
+    const newTransactionContainerId = `transaction-container-${blockCount}`;
+
+    // Set the inner HTML for the new dropdown
+    newDropdown.innerHTML = `
+      <button>Block ${blockCount}</button>
+      <div class="dropdown-content" id="${newTransactionContainerId}">
+        <div class="transaction">
+          Transaction:
+          <br> Hash: Placeholder
+          <br> Sender: Placeholder
+          <br> Coins: Placeholder
+          <br> Transaction Fee: Placeholder
+          <br> Receiver: Placeholder
+        </div>
+        <div class="transaction">
+          Transaction:
+          <br> Hash: Placeholder
+          <br> Sender: Placeholder
+          <br> Coins: Placeholder
+          <br> Transaction Fee: Placeholder
+          <br> Receiver: Placeholder
+        </div>
+      </div>
+      <button class="add-transaction-btn" onclick="addTransaction('${newTransactionContainerId}')">Add Transaction to Block ${blockCount}</button>
+    `;
+
+    // Append the new dropdown to the blocks container
+    const blocksContainer = document.getElementById('blocks-container');
+    blocksContainer.appendChild(newDropdown);
+
+    // Move the "Load One Block" button to the bottom
+    const loadBlockBtn = document.getElementById('load-block-btn');
+    blocksContainer.appendChild(loadBlockBtn.parentNode);
+  }
+
+  function addTransaction(containerId) {
+    // Create a new div element for the transaction
+    const newTransaction = document.createElement('div');
+    newTransaction.classList.add('transaction');
+    
+    // Set the inner HTML for the new transaction
+    newTransaction.innerHTML = `
+      Transaction:
+      <br> Hash: Placeholder
+      <br> Sender: Placeholder
+      <br> Coins: Placeholder
+      <br> Transaction Fee: Placeholder
+      <br> Receiver: Placeholder
+    `;
+
+    // Append the new transaction to the transaction container
+    const transactionContainer = document.getElementById(containerId);
+    transactionContainer.appendChild(newTransaction);
+  }
+</script>
+
+</body>
+</html>

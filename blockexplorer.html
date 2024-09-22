@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Width Dropdown</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .dropdown {
+      position: relative;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .dropdown button {
+      width: 100%;
+      background-color: #007BFF; /* Blue color */
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: relative;
+      background-color: #f9f9f9;
+      min-width: 100%;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      padding: 12px 16px;
+      z-index: 1;
+      margin-top: 10px;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .transaction {
+      margin-bottom: 16px;
+    }
+
+    .add-transaction-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #28a745; /* Green color */
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .center-button {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="center-button">
+<button class="add-transaction-btn" id="load-block-btn" onclick="loadInitialBlock()">Load One Block</button>
+</div>
+<div id="blocks-container"></div>
+
+<script>
+  let currentBlockNum = -1;
+
+  async function loadInitialBlock() {
+   if (currentBlockNum == -1) {
+    try {
+      // Fetch the initial block number from the server
+      const response = await fetch('/getblocknum');
+      const data = await response.json();
+      console.log(data)
+      currentBlockNum = data;
+      console.log(currentBlockNum)
+      // Create the first block
+      createBlock(currentBlockNum);
+
+      // Move the "Load One Block" button to the bottom
+      moveLoadBlockButton();
+
+    } catch (error) {
+      console.error('Error loading initial block:', error);
+    }
+   }
+   else {
+    try {
+     createBlock(currentBlockNum);
+
+      // Move the "Load One Block" button to the bottom
+      moveLoadBlockButton();
+
+    } catch (error) {
+      console.error('Error loading initial block:', error);
+    }
+   }
+  }
+
+  function createBlock(blockNum) {
+    // Create a new div element for the new dropdown
+    const newDropdown = document.createElement('div');
+    newDropdown.classList.add('dropdown');
+    
+    // Generate a unique ID for the new transaction container
+    const newTransactionContainerId = `transaction-container-${blockNum}`;
+
+    // Set the inner HTML for the new dropdown
+    newDropdown.innerHTML = `
+      <button>Block ${blockNum}</button>
+      <div class="dropdown-content" id="${newTransactionContainerId}">
+        
+      </div>
+      <button class="add-transaction-btn" onclick="addTransaction('${newTransactionContainerId}', ${blockNum})">Add Transaction to Block ${blockNum}</button>
+    `;
+
+    // Append the new block to the container
+    const blocksContainer = document.getElementById('blocks-container');
+    blocksContainer.appendChild(newDropdown);
+
+    // Decrement the block number for the next block
+    currentBlockNum--;
+
+    // Move the "Load One Block" button to the bottom
+    moveLoadBlockButton();
+  }
+
+  function moveLoadBlockButton() {
+    const loadBlockBtn = document.getElementById('load-block-btn');
+    const blocksContainer = document.getElementById('blocks-container');
+    blocksContainer.appendChild(loadBlockBtn.parentNode);
+  }
+
+  async function addTransaction(containerId, blockNum) {
+   try {
+    // Send a POST request with blockNum as part of the data
+    const response = await fetch('/gettransactionsofablock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ blocknum: blockNum }) // Send blocknum in the data
+    });
+
+    const transactions = await response.json();
+
+    // Iterate over the transactions dictionary (object)
+    for (const [key, transaction] of Object.entries(transactions)) {
+      // Make sure the transaction is an object (and not just a value like a string)
+     for (const[key2,transaction2] of Object.entries(transaction)) {
+      if (typeof transaction === 'object' && transaction !== null) {
+        // Create a new div element for each transaction
+        const newTransaction = document.createElement('div');
+        newTransaction.classList.add('transaction');
+        
+        // Set the inner HTML with transaction details
+        console.log(transaction2)
+        newTransaction.innerHTML = `
+          Transaction:
+          <br> Hash: ${key2}
+          <br> Sender: ${transaction2.Sender || 'N/A'}
+          <br> Coins: ${transaction2.amountofcoins || 'N/A'}
+          <br> Transaction Fee: ${transaction2.transactionfee || 'N/A'}
+          <br> Receiver: ${transaction2.Reciever || 'N/A'}
+        `;
+
+        // Append the new transaction to the transaction container
+        const transactionContainer = document.getElementById(containerId);
+        transactionContainer.appendChild(newTransaction);
+      } else {
+        console.warn(`Transaction ${key} is not a valid object`, transaction);
+      }
+     }
+    }
+
+   } catch (error) {
+    console.error('Error fetching transactions:', error);
+   }
+  }
+
+
+</script>
+
+</body>
+</html>
